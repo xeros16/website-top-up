@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, Bank, QrCode, Wallet } from '@phosphor-icons/react'
 import { Cover } from './Catalog'
 import { DemoNote } from './DemoNote'
-import { games, packName, paymentMethods, rupiah, type Game, type PlayerField } from './catalog'
+import { games, packName, paymentMethods, rupiah, type Game, type PlayerField } from './catalog-data'
 import { createOrder } from './order-storage'
 
 const methodIcons = { wallet: Wallet, bank: Bank, qr: QrCode }

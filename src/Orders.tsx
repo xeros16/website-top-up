@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowRight, CheckCircle, Clock, MagnifyingGlass, XCircle } from '@phosphor-icons/react'
 import { DemoNote } from './DemoNote'
-import { rupiah } from './catalog'
+import { rupiah } from './catalog-data'
 import { changeStatus, findOrder, statuses, type Order, type OrderStatus } from './order-storage'
 
 const statusIcons = { pending: Clock, paid: CheckCircle, failed: XCircle }

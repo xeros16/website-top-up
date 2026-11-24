@@ -35,7 +35,7 @@ Penyimpanan browser memuat kode pesanan, game, nominal, metode, rincian harga, d
 
 | Lokasi | Pengaturan |
 | --- | --- |
-| [src/catalog.ts](src/catalog.ts) | Nama merek, studio, daftar game, aturan ID, nominal, harga contoh, dan biaya metode bayar |
+| [src/catalog-data.ts](src/catalog-data.ts) | Nama merek, studio, daftar game, aturan ID, nominal, harga contoh, dan biaya metode bayar |
 | [src/styles.css](src/styles.css) | Token warna burgundy dan putih hangat, font, serta aturan tata letak |
 | [index.html](index.html) | Judul halaman, deskripsi, dan warna bilah browser |
 | [public/images](public/images) | Ilustrasi konsol dan sampul katalog dalam WebP |

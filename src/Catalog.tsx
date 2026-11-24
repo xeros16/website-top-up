@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, MagnifyingGlass, X } from '@phosphor-icons/react'
-import { games, imageUrl, rupiah, type Game } from './catalog'
+import { games, imageUrl, rupiah, type Game } from './catalog-data'
 
 const categories = ['Semua game', ...new Set(games.map((game) => game.category))]
 
