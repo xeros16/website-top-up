@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, CheckCircle, Clock, Copy, MagnifyingGlass, XCircle } from '@phosphor-icons/react'
 import { DemoNote } from './DemoNote'
-import { rupiah } from './catalog-data'
+import { games, packName, paymentMethods, rupiah } from './catalog-data'
 import { changeStatus, readOrders, statuses, type Order, type OrderStatus } from './order-storage'
 
 const statusIcons = { pending: Clock, paid: CheckCircle, failed: XCircle }
@@ -25,6 +25,12 @@ function Receipt({ initial }: { initial: Order }) {
   const [order, setOrder] = useState(initial)
   const [error, setError] = useState('')
   const [copyMessage, setCopyMessage] = useState('')
+  const game = games.find((item) => order.gameId ? item.id === order.gameId : item.name === order.game)
+  const pack = game?.packs.find((item) => order.packId ? item.id === order.packId : packName(game, item) === order.nominal)
+  const method = paymentMethods.find((item) => order.methodId ? item.id === order.methodId : item.label === order.method)
+  const selection = new URLSearchParams({ ulang: '1' })
+  if (pack) selection.set('pack', pack.id)
+  if (method) selection.set('method', method.id)
 
   async function copyCode() {
     try {
@@ -64,6 +70,11 @@ function Receipt({ initial }: { initial: Order }) {
         <div><dt>Biaya pembayaran</dt><dd>{rupiah(order.fee)}</dd></div>
         <div className="price-total"><dt>Total</dt><dd>{rupiah(order.total)}</dd></div>
       </dl>
+      {game && (
+        <Link className="button secondary" to={`/game/${game.id}?${selection}`}>
+          Pesan lagi <ArrowRight size={17} aria-hidden="true" />
+        </Link>
+      )}
       <div className="simulator">
         <h3>Skenario simulasi</h3>
         <p>{statusHelp[order.status]}</p>

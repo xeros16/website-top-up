@@ -1,5 +1,5 @@
 import { useRef, useState, type FormEvent } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, Bank, QrCode, Wallet } from '@phosphor-icons/react'
 import { Cover } from './Catalog'
 import { DemoNote } from './DemoNote'
@@ -18,12 +18,14 @@ function playerError(field: PlayerField, value: string) {
   return ''
 }
 
-function Checkout({ game }: { game: Game }) {
+function Checkout({ game, selection }: { game: Game; selection: URLSearchParams }) {
   const navigate = useNavigate()
   const [values, setValues] = useState<Record<string, string>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [packId, selectPack] = useState(game.packs[0].id)
-  const [methodId, selectMethod] = useState<(typeof paymentMethods)[number]['id']>(paymentMethods[0].id)
+  const previousPack = game.packs.find((item) => item.id === selection.get('pack'))
+  const previousMethod = paymentMethods.find((item) => item.id === selection.get('method'))
+  const [packId, selectPack] = useState((previousPack ?? game.packs[0]).id)
+  const [methodId, selectMethod] = useState((previousMethod ?? paymentMethods[0]).id)
   const pack = game.packs.find((item) => item.id === packId)!
   const method = paymentMethods.find((item) => item.id === methodId)!
   const nominal = packName(game, pack)
@@ -48,6 +50,7 @@ function Checkout({ game }: { game: Game }) {
     setSaveError('')
     try {
       const order = createOrder({
+        gameId: game.id, packId, methodId,
         game: game.name, nominal, method: method.label, subtotal: pack.price, fee: method.fee, total,
       })
       navigate(`/pesanan/${order.code}`)
@@ -61,6 +64,13 @@ function Checkout({ game }: { game: Game }) {
   return (
     <form className="checkout-grid" noValidate onSubmit={submit}>
       <div className="checkout-steps">
+        {selection.has('ulang') && (
+          <p className="reorder-note">
+            {previousPack && previousMethod
+              ? 'Isi kembali data pemain dan periksa total sebelum membuat pesanan baru.'
+              : 'Sebagian pilihan lama sudah tidak tersedia. Periksa nominal, metode pembayaran, dan total sebelum melanjutkan.'}
+          </p>
+        )}
         <fieldset className="form-section">
           <legend><span className="step">1</span> Data pemain</legend>
           <div className="player-fields">
@@ -134,6 +144,7 @@ function Checkout({ game }: { game: Game }) {
 
 export function Product() {
   const { gameId } = useParams()
+  const [selection] = useSearchParams()
   const game = games.find((entry) => entry.id === gameId)
   if (!game) return <div className="shell empty"><h1>Game tidak ditemukan</h1><Link to="/" className="button primary">Kembali ke katalog</Link></div>
   return (
@@ -144,7 +155,7 @@ export function Product() {
         <div><h1>{game.name}</h1><p>{game.publisher} · {game.category}</p></div>
       </header>
       <DemoNote />
-      <Checkout key={game.id} game={game} />
+      <Checkout key={`${game.id}?${selection}`} game={game} selection={selection} />
     </div>
   )
 }

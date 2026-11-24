@@ -29,6 +29,8 @@ Build ada di `dist/`. Navigasi memakai hash, sehingga situs dapat dipasang di ho
 4. Pesanan dimulai dengan status **Menunggu pembayaran**. Di bawah **Skenario simulasi**, pilih **Berhasil** untuk menyelesaikan demo atau **Gagal** untuk melihat cara mencoba kembali. Pilih **Menunggu pembayaran** untuk mengatur ulang skenario.
 5. Gunakan **Salin kode** untuk menyalin kode `MKO-…`. Buka **Cek pesanan**, lalu masukkan kode atau pilih pesanan dari **Riwayat pesanan**. Muat ulang untuk memeriksa status yang tersimpan.
 
+Pilih **Pesan lagi** di detail pesanan untuk membuka checkout dengan pilihan lama yang masih tersedia. Isi ulang ID pemain dan periksa total berdasarkan harga katalog saat ini.
+
 Penyimpanan browser memuat kode pesanan, game, nominal, metode, rincian harga, dan status. ID pemain hanya dipakai selama mengisi checkout. Menghapus data situs, pindah browser, atau membuka mode privat menyebabkan kode dari sesi awal tidak ditemukan.
 
 ## Mengubah katalog dan merek
@@ -63,7 +65,7 @@ npm test
 
 Untuk memakai Chromium yang sudah terpasang, atur `CHROMIUM_PATH` ke jalur binernya. Untuk menghasilkan screenshot, atur `MIKOO_CAPTURE_DIR` ke folder keluaran yang diinginkan.
 
-`npm ci`, `npm run typecheck`, dan `npm run build` lulus. Sebelas tes Playwright lulus di Chromium 156. Cakupan mencakup:
+`npm ci`, `npm run typecheck`, dan `npm run build` lulus. Dua belas tes Playwright lulus di Chromium 156. Cakupan mencakup:
 
 - Pencarian dan kategori yang bekerja bersamaan, hasil kosong, reset, serta navigasi produk.
 - Validasi ID, nol di depan, penggantian produk, perhitungan total, dan pencegahan dua pesanan dari pengiriman berulang.

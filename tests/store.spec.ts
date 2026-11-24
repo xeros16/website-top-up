@@ -159,6 +159,31 @@ test('pesanan bisa disalin manual saat browser menolak clipboard', async ({ page
   await expect(page.locator('.receipt .order-code')).toHaveText(/^MKO-[0-9A-F]{12}$/)
 })
 
+test('pesan lagi memakai harga katalog dan meminta ID baru', async ({ page }) => {
+  await openMobileLegends(page)
+  await page.evaluate(() => {
+    localStorage.setItem('mikoo-store.orders.v1', JSON.stringify([{
+      code: 'MKO-A1B2C3D4E5F6', game: 'Mobile Legends', nominal: '59 Diamonds', method: 'Transfer bank',
+      subtotal: 9000, fee: 1000, total: 10000, status: 'paid',
+    }]))
+  })
+  await page.goto('/#/pesanan/MKO-A1B2C3D4E5F6')
+  await expect(page.locator('.price-total')).toContainText('Rp 10.000')
+  await page.getByRole('link', { name: 'Pesan lagi' }).click()
+  await expect(page.getByLabel('User ID', { exact: true })).toHaveValue('')
+  await expect(page.getByLabel('Zone ID', { exact: true })).toHaveValue('')
+  await expect(page.getByRole('radio', { name: /^59 Diamonds/ })).toBeChecked()
+  await expect(page.getByRole('radio', { name: /Transfer bank/ })).toBeChecked()
+  await expect(page.locator('.price-total')).toContainText('Rp 18.000')
+  await fillPlayer(page)
+  await page.getByRole('button', { name: 'Simulasikan pembayaran' }).click()
+  await expect(page.getByRole('status')).toHaveText('Menunggu pembayaran')
+  await expect(page.locator('.order-code')).not.toHaveText('MKO-A1B2C3D4E5F6')
+  await page.getByRole('link', { name: 'Pesan lagi' }).click()
+  await expect(page.getByRole('radio', { name: /^59 Diamonds/ })).toBeChecked()
+  await expect(page.getByLabel('User ID', { exact: true })).toHaveValue('')
+})
+
 test('checkout dan simulasi dengan keyboard', async ({ page }) => {
   await page.goto('/#/game/mobile-legends')
   const userId = page.getByLabel('User ID', { exact: true })

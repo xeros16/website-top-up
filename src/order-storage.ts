@@ -8,6 +8,9 @@ export type OrderStatus = keyof typeof statuses
 
 export type Order = {
   code: string
+  gameId?: string
+  packId?: string
+  methodId?: string
   game: string
   nominal: string
   method: string
