@@ -1,9 +1,9 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowRight, CheckCircle, Clock, MagnifyingGlass, XCircle } from '@phosphor-icons/react'
+import { ArrowLeft, ArrowRight, CheckCircle, Clock, Copy, MagnifyingGlass, XCircle } from '@phosphor-icons/react'
 import { DemoNote } from './DemoNote'
 import { rupiah } from './catalog-data'
-import { changeStatus, findOrder, statuses, type Order, type OrderStatus } from './order-storage'
+import { changeStatus, readOrders, statuses, type Order, type OrderStatus } from './order-storage'
 
 const statusIcons = { pending: Clock, paid: CheckCircle, failed: XCircle }
 const statusHelp = {
@@ -12,10 +12,28 @@ const statusHelp = {
   failed: 'Coba ulang dengan memilih skenario Menunggu pembayaran atau Berhasil di bawah.',
 }
 
+function StatusLabel({ status, announce = false }: { status: OrderStatus; announce?: boolean }) {
+  const Icon = statusIcons[status]
+  return (
+    <span className={`order-status ${status}`} role={announce ? 'status' : undefined}>
+      <Icon size={18} aria-hidden="true" /> {statuses[status]}
+    </span>
+  )
+}
+
 function Receipt({ initial }: { initial: Order }) {
   const [order, setOrder] = useState(initial)
   const [error, setError] = useState('')
-  const Icon = statusIcons[order.status]
+  const [copyMessage, setCopyMessage] = useState('')
+
+  async function copyCode() {
+    try {
+      await navigator.clipboard.writeText(order.code)
+      setCopyMessage('Kode pesanan disalin.')
+    } catch {
+      setCopyMessage('Browser tidak mengizinkan penyalinan otomatis. Pilih teks kode lalu salin secara manual.')
+    }
+  }
 
   function simulate(status: OrderStatus) {
     try {
@@ -29,9 +47,16 @@ function Receipt({ initial }: { initial: Order }) {
   return (
     <article className="receipt" aria-labelledby="receipt-title">
       <div className="receipt-head">
-        <div><h2 id="receipt-title">{order.game}</h2><p className="order-code">{order.code}</p></div>
-        <div className={`order-status ${order.status}`} role="status"><Icon size={18} aria-hidden="true" /> {statuses[order.status]}</div>
+        <h2 id="receipt-title">{order.game}</h2>
+        <StatusLabel status={order.status} announce />
       </div>
+      <div className="receipt-code">
+        <code className="order-code">{order.code}</code>
+        <button className="button secondary" type="button" onClick={copyCode}>
+          <Copy size={17} aria-hidden="true" /> Salin kode
+        </button>
+      </div>
+      <p className="copy-feedback" aria-live="polite">{copyMessage}</p>
       <dl className="price-list">
         <div><dt>Nominal</dt><dd>{order.nominal}</dd></div>
         <div><dt>Metode pembayaran</dt><dd>{order.method}</dd></div>
@@ -53,20 +78,49 @@ function Receipt({ initial }: { initial: Order }) {
   )
 }
 
+function OrderHistory({ orders }: { orders: Order[] | null }) {
+  return (
+    <section className="order-history" aria-labelledby="history-title">
+      <h2 id="history-title">Riwayat pesanan</h2>
+      {orders?.length ? (
+        <ul className="history-list">
+          {orders.map((order) => (
+            <li key={order.code}>
+              <Link className="history-order" to={`/pesanan/${encodeURIComponent(order.code)}`}>
+                <span className="history-details">
+                  <strong>{order.game}</strong>
+                  <span className="history-nominal">{order.nominal} · {rupiah(order.total)}</span>
+                  <code className="order-code">{order.code}</code>
+                </span>
+                <StatusLabel status={order.status} />
+                <ArrowRight className="history-arrow" size={19} aria-hidden="true" />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="empty history-empty">
+          <p>{orders ? 'Belum ada pesanan di browser ini.' : 'Riwayat tidak dapat dibaca. Periksa izin penyimpanan situs, lalu muat ulang.'}</p>
+          {orders && <Link to="/" className="button secondary">Lihat katalog game <ArrowRight size={17} aria-hidden="true" /></Link>}
+        </div>
+      )}
+    </section>
+  )
+}
+
 function Lookup({ code }: { code: string }) {
   const navigate = useNavigate()
   const [query, setQuery] = useState(code)
   const [blankError, setBlankError] = useState(false)
 
-  let order: Order | undefined
-  let storageError = false
-  if (code) {
+  const [orders] = useState(() => {
     try {
-      order = findOrder(code)
+      return readOrders()
     } catch {
-      storageError = true
+      return null
     }
-  }
+  })
+  const order = orders?.find((entry) => entry.code === code.trim().toUpperCase())
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -97,11 +151,13 @@ function Lookup({ code }: { code: string }) {
       {order && <Receipt initial={order} />}
       {code && !order && (
         <div className="empty" role="status">
-          <h2>{storageError ? 'Pesanan tidak dapat dibaca' : 'Kode pesanan tidak ditemukan'}</h2>
-          <p>{storageError ? 'Periksa izin penyimpanan situs di browser, lalu coba lagi.' : 'Periksa kembali kode dan gunakan browser yang dipakai untuk membuat pesanan.'}</p>
+          <h2>{orders ? 'Kode pesanan tidak ditemukan' : 'Pesanan tidak dapat dibaca'}</h2>
+          <p>{orders ? 'Periksa kembali kode dan gunakan browser yang dipakai untuk membuat pesanan.' : 'Periksa izin penyimpanan situs di browser, lalu coba lagi.'}</p>
         </div>
       )}
-      {!code && <Link to="/" className="back-link">Lihat katalog game <ArrowRight size={17} aria-hidden="true" /></Link>}
+      {code ? (
+        <Link to="/pesanan" className="back-link history-back"><ArrowLeft size={17} aria-hidden="true" /> Kembali ke riwayat</Link>
+      ) : <OrderHistory orders={orders} />}
     </>
   )
 }
@@ -112,7 +168,7 @@ export function Orders() {
     <div className="shell page order-page">
       <header className="page-title">
         <h1>Cek pesanan</h1>
-        <p>Masukkan kode dari pesanan yang dibuat di browser ini.</p>
+        <p>Cari berdasarkan kode atau pilih pesanan dari riwayat di browser ini.</p>
       </header>
       <DemoNote />
       <Lookup key={code} code={code} />

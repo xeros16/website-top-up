@@ -27,7 +27,7 @@ Build ada di `dist/`. Navigasi memakai hash, sehingga situs dapat dipasang di ho
 2. Masukkan User ID `0012345678` dan Zone ID `0123`. Untuk produk dengan satu kolom, coba Free Fire dengan ID Pemain `0012345678`.
 3. Pilih nominal dan metode pembayaran. Cek data dan total di **Ringkasan pesanan**, lalu pilih **Simulasikan pembayaran**.
 4. Pesanan dimulai dengan status **Menunggu pembayaran**. Di bawah **Skenario simulasi**, pilih **Berhasil** untuk menyelesaikan demo atau **Gagal** untuk melihat cara mencoba kembali. Pilih **Menunggu pembayaran** untuk mengatur ulang skenario.
-5. Salin kode `MKO-…`, buka **Cek pesanan**, lalu masukkan kode tersebut. Muat ulang untuk memeriksa status yang tersimpan.
+5. Gunakan **Salin kode** untuk menyalin kode `MKO-…`. Buka **Cek pesanan**, lalu masukkan kode atau pilih pesanan dari **Riwayat pesanan**. Muat ulang untuk memeriksa status yang tersimpan.
 
 Penyimpanan browser memuat kode pesanan, game, nominal, metode, rincian harga, dan status. ID pemain hanya dipakai selama mengisi checkout. Menghapus data situs, pindah browser, atau membuka mode privat menyebabkan kode dari sesi awal tidak ditemukan.
 
@@ -63,13 +63,16 @@ npm test
 
 Untuk memakai Chromium yang sudah terpasang, atur `CHROMIUM_PATH` ke jalur binernya. Untuk menghasilkan screenshot, atur `MIKOO_CAPTURE_DIR` ke folder keluaran yang diinginkan.
 
-`npm ci`, `npm run typecheck`, dan `npm run build` lulus. Sembilan tes Playwright lulus di Chromium 156. Cakupan mencakup:
+`npm ci`, `npm run typecheck`, dan `npm run build` lulus. Sebelas tes Playwright lulus di Chromium 156. Cakupan mencakup:
 
 - Pencarian dan kategori yang bekerja bersamaan, hasil kosong, reset, serta navigasi produk.
 - Validasi ID, nol di depan, penggantian produk, perhitungan total, dan pencegahan dua pesanan dari pengiriman berulang.
 - Tiga status pembayaran demo, pencarian kode yang valid dan tidak dikenal, status setelah refresh, dan pemeriksaan bahwa ID pemain tidak tersimpan.
+- Riwayat untuk pesanan lama dan baru, pembukaan kembali detail, penyalinan kode, serta petunjuk salin manual jika izin clipboard ditolak.
 - Lebar 360, 390, 768, dan 1440 px, tanpa scroll horizontal, termasuk ukuran target sentuh utama dan posisi ringkasan.
-- Navigasi checkout dengan keyboard, fokus terlihat, preferensi reduced motion, dan pemindaian axe tanpa temuan WCAG AA dalam tiga tampilan yang diuji. Perubahan kesalahan dan status memakai live region. Pengumuman suara pembaca layar belum diuji langsung.
+- Navigasi checkout dengan keyboard, fokus terlihat, preferensi reduced motion, dan pemindaian axe tanpa temuan WCAG AA pada beranda, checkout, detail pesanan, dan riwayat. Perubahan kesalahan dan status memakai live region. Pengumuman suara pembaca layar belum diuji langsung.
 - Visibilitas kolom saat tinggi viewport diperkecil telah diperiksa di Chromium. Keyboard virtual perangkat fisik belum diuji.
 
 Screenshot [katalog desktop](docs/screenshots/katalog-1440.png), [katalog mobile](docs/screenshots/katalog-390.png), [checkout desktop](docs/screenshots/checkout-1440.png), dan [checkout mobile](docs/screenshots/checkout-390.png) direkam dari build produksi di Chromium.
+
+Tampilan riwayat dengan dua pesanan demo tersedia dalam [screenshot desktop](docs/screenshots/riwayat-1440.png) dan [screenshot mobile](docs/screenshots/riwayat-390.png).

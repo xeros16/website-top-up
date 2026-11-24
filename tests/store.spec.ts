@@ -103,6 +103,62 @@ test('total, pengiriman ganda, status, refresh, dan pencarian pesanan', async ({
   await expect(page.locator('.receipt')).toContainText('Rp 18.000')
 })
 
+test('riwayat membuka pesanan lama dan baru serta menyalin kode', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+  await page.goto('/#/pesanan')
+  const history = page.getByRole('region', { name: 'Riwayat pesanan' })
+  await expect(history.getByText('Belum ada pesanan di browser ini.')).toBeVisible()
+
+  await page.evaluate(() => {
+    localStorage.setItem('mikoo-store.orders.v1', JSON.stringify([{
+      code: 'MKO-A1B2C3D4E5F6', game: 'Free Fire', nominal: '50 Diamonds', method: 'Dompet digital',
+      subtotal: 8000, fee: 1500, total: 9500, status: 'failed',
+    }]))
+  })
+
+  await openMobileLegends(page)
+  await fillPlayer(page)
+  await page.getByRole('button', { name: 'Simulasikan pembayaran' }).click()
+  await expect(page.getByRole('heading', { name: 'Cek pesanan' })).toBeVisible()
+  const code = (await page.locator('.receipt .order-code').textContent())!
+  await page.getByRole('button', { name: 'Salin kode' }).click()
+  await expect(page.getByText('Kode pesanan disalin.')).toBeVisible()
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(code)
+  await page.getByRole('button', { name: 'Berhasil', exact: true }).click()
+  await page.getByRole('link', { name: 'Kembali ke riwayat' }).click()
+  await page.reload()
+
+  const entries = history.getByRole('link')
+  await expect(entries).toHaveCount(2)
+  await expect(entries.nth(0)).toContainText('Mobile Legends')
+  await expect(entries.nth(0)).toContainText('Berhasil')
+  await expect(entries.nth(0)).toContainText('Rp 5.000')
+  await expect(entries.nth(1)).toContainText('MKO-A1B2C3D4E5F6')
+  await expect(entries.nth(1)).toContainText('Gagal')
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await capture(page, 'riwayat-1440.png')
+  await page.setViewportSize({ width: 390, height: 844 })
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390)
+  await capture(page, 'riwayat-390.png')
+  await entries.nth(1).click()
+  await expect(page.getByRole('heading', { name: 'Free Fire' })).toBeVisible()
+  await expect(page.getByRole('status')).toHaveText('Gagal')
+})
+
+test('pesanan bisa disalin manual saat browser menolak clipboard', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator.clipboard, 'writeText', {
+      value: async () => { throw new DOMException('Permission denied', 'NotAllowedError') },
+    })
+  })
+  await openMobileLegends(page)
+  await fillPlayer(page)
+  await page.getByRole('button', { name: 'Simulasikan pembayaran' }).click()
+  await page.getByRole('button', { name: 'Salin kode' }).click()
+  await expect(page.getByText(/Pilih teks kode lalu salin secara manual/)).toBeVisible()
+  await expect(page.locator('.receipt .order-code')).toHaveText(/^MKO-[0-9A-F]{12}$/)
+})
+
 test('checkout dan simulasi dengan keyboard', async ({ page }) => {
   await page.goto('/#/game/mobile-legends')
   const userId = page.getByLabel('User ID', { exact: true })
@@ -182,5 +238,8 @@ test('axe WCAG AA pada katalog, checkout, dan pesanan', async ({ page }) => {
   await scan()
   await page.getByRole('button', { name: 'Simulasikan pembayaran' }).click()
   await expect(page.getByRole('status')).toHaveText('Menunggu pembayaran')
+  await scan()
+  await page.getByRole('link', { name: 'Kembali ke riwayat' }).click()
+  await expect(page.getByRole('region', { name: 'Riwayat pesanan' })).toBeVisible()
   await scan()
 })

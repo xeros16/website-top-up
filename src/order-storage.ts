@@ -28,14 +28,10 @@ function isOrder(value: unknown): value is Order {
     && Object.hasOwn(statuses, order.status)
 }
 
-function readOrders() {
+export function readOrders() {
   const saved: unknown = JSON.parse(localStorage.getItem(storageKey) ?? '[]')
   if (!Array.isArray(saved)) throw new Error('Format pesanan tidak dikenal')
   return saved.filter(isOrder)
-}
-
-export function findOrder(code: string) {
-  return readOrders().find((order) => order.code === code.toUpperCase().trim())
 }
 
 export function createOrder(details: Omit<Order, 'code' | 'status'>) {

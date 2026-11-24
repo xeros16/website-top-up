@@ -148,7 +148,11 @@ button { cursor: pointer; }
 .receipt { @apply rounded-xl border border-line bg-surface p-4 sm:p-6; }
 .receipt-head { @apply flex flex-wrap items-start justify-between gap-3; }
 .order-code { @apply mt-1 font-mono text-sm font-semibold text-muted; overflow-wrap: anywhere; }
+.receipt-code { @apply mt-3 flex flex-wrap items-center gap-x-4 gap-y-2; }
+.receipt-code .order-code { @apply m-0 select-all; }
+.copy-feedback { @apply mt-2 text-sm font-semibold text-muted empty:mt-0; }
 .order-status { @apply inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-extrabold; }
+.order-status svg { @apply shrink-0; }
 .order-status.pending { @apply bg-[#f6edda] text-[#684b16]; }
 .order-status.paid { @apply bg-[#e4eee4] text-[#29513d]; }
 .order-status.failed { @apply bg-[#f7e4de] text-[#842923]; }
@@ -156,6 +160,23 @@ button { cursor: pointer; }
 .simulator h3 { @apply font-extrabold; }
 .simulator p { @apply mb-3 mt-1 text-sm leading-relaxed text-muted; }
 .scenario-buttons { @apply flex flex-wrap gap-2; }
+.history-back { @apply mt-4; }
+.order-history { @apply mt-8; }
+.order-history h2 { @apply mb-3 font-display text-2xl font-semibold tracking-tight text-brand-deep; }
+.history-list { @apply divide-y divide-line rounded-xl border border-line bg-surface; }
+.history-order {
+  @apply grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 px-4 py-3 hover:bg-rose sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:px-5;
+  border-radius: inherit;
+}
+.history-list li:first-child { @apply rounded-t-xl; }
+.history-list li:last-child { @apply rounded-b-xl; }
+.history-details { @apply col-start-1 row-start-1 grid gap-0.5; }
+.history-details strong { @apply font-extrabold; }
+.history-nominal { @apply text-sm font-semibold text-muted; }
+.history-details .order-code { @apply mt-0 text-xs; }
+.history-order .order-status { @apply col-start-1 row-start-2 justify-self-start sm:col-start-2 sm:row-start-1; }
+.history-arrow { @apply col-start-2 row-start-1 self-center text-brand sm:col-start-3; }
+.history-empty { @apply justify-items-start py-6 text-left; }
 
 @media (max-width: 900px) {
   .shell { width: calc(100% - 56px); }
